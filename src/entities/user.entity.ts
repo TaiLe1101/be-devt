@@ -1,4 +1,4 @@
-import { BaseEntity } from '../base/base.entity';
+import { BaseEntity } from '../base/entity.base';
 import { Column, Entity, Unique } from 'typeorm';
 import { Expose } from 'class-transformer';
 
@@ -20,4 +20,7 @@ export class User extends BaseEntity {
     @Expose()
     @Column({ default: null })
     avatar: string;
+
+    @Column({ default: null })
+    refreshToken: string;
 }

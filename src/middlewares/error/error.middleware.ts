@@ -5,7 +5,7 @@ import {
     NestMiddleware,
 } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { ApiResponse } from 'src/utils/api.response';
+import { ApiResponse } from 'src/classes/api-response.class';
 
 @Injectable()
 export class ErrorMiddleware implements NestMiddleware {

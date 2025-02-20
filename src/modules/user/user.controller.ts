@@ -1,13 +1,22 @@
-import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    HttpStatus,
+    Post,
+    UseGuards,
+} from '@nestjs/common';
+import { ApiResponse } from 'src/classes/api-response.class';
 import { User } from 'src/entities/user.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guards';
 import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
 import { UserService } from 'src/modules/user/user.service';
-import { ApiResponse } from 'src/utils/api.response';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    @UseGuards(JwtAuthGuard)
     @Get()
     async index() {
         const users = await this.userService.index();

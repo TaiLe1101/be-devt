@@ -1,11 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
-import { UserDto } from 'src/modules/auth/dto/user.dto';
-import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { ApiResponse } from 'src/utils/api.response';
+import { User } from 'src/entities/user.entity';
 import { ApiErrorException } from 'src/exceptions/api-error.exception';
+import { UserDto } from 'src/modules/user/dto/user.dto';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -32,5 +31,55 @@ export class UserService {
 
     async findByUsername(username: string): Promise<User | null> {
         return await this.userRepository.findOneBy({ username });
+    }
+
+    async findById(id: number): Promise<User | null> {
+        return await this.userRepository.findOneBy({ id });
+    }
+
+    async update(id: number, data: User): Promise<UserDto> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new ApiErrorException();
+        }
+
+        try {
+            const updated = await this.userRepository.save({
+                ...user,
+                ...data,
+            });
+            return UserDto.from(updated);
+        } catch {
+            throw new ApiErrorException();
+        }
+    }
+
+    async delete(id: number): Promise<void> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new ApiErrorException();
+        }
+
+        try {
+            await this.userRepository.remove(user);
+        } catch {
+            throw new ApiErrorException();
+        }
+    }
+
+    async updateRefreshToken(id: number, refreshToken: string): Promise<void> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new ApiErrorException();
+        }
+
+        try {
+            await this.userRepository.save({
+                ...user,
+                refreshToken,
+            });
+        } catch {
+            throw new ApiErrorException();
+        }
     }
 }

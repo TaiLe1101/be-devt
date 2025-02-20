@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../../entities/user.entity';
-import { UserService } from 'src/modules/user/user.service';
 import * as bcrypt from 'bcrypt';
-import { UserDto } from 'src/modules/auth/dto/user.dto';
+import { TokenService } from 'src/modules/token/token.service';
+import { UserDto } from 'src/modules/user/dto/user.dto';
+import { UserService } from 'src/modules/user/user.service';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
         private readonly userService: UserService,
+        private readonly tokenService: TokenService,
     ) {}
 
     async verifyUser(reqBody: User): Promise<UserDto | null> {
@@ -30,5 +28,23 @@ export class AuthService {
         }
 
         return UserDto.from(user);
+    }
+
+    async login(
+        reqBody: User,
+    ): Promise<{ accessToken: string; refreshToken: string } | null> {
+        const user = await this.verifyUser(reqBody);
+
+        if (!user) {
+            return null;
+        }
+
+        const [accessToken, refreshToken] = this.tokenService.generateToken({
+            payload: { sub: user.id },
+        });
+
+        await this.userService.updateRefreshToken(user.id, refreshToken);
+
+        return { accessToken, refreshToken };
     }
 }
