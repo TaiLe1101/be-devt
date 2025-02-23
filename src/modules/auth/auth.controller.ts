@@ -17,6 +17,7 @@ import { Request, Response } from 'express';
 import { TokenService } from 'src/modules/token/token.service';
 import { JwtPayload } from 'src/classes/jwt-payload.class';
 import { REFRESH_TOKEN_EXPIRY } from 'src/constants';
+import { ApiErrorException } from 'src/exceptions/api-error.exception';
 
 @Controller('auth')
 export class AuthController {
@@ -47,9 +48,9 @@ export class AuthController {
         const result = await this.authService.login(data);
 
         if (!result) {
-            return new ApiResponse(
-                HttpStatus.UNAUTHORIZED,
+            throw new ApiErrorException(
                 'Invalid username or password',
+                HttpStatus.UNAUTHORIZED,
             );
         }
 
